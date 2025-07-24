@@ -22,7 +22,10 @@ func NewClient(
 }
 
 func (c *Client) Read() {
-	defer c.conn.Close()
+	defer func() {
+		c.hub.unregister <- c
+		c.conn.Close()
+	}()
 
 	for message := range c.send {
 		c.conn.WriteMessage(websocket.TextMessage, message)

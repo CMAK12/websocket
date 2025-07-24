@@ -17,6 +17,7 @@ func MustRun() error {
 	service := &service.Service{}
 
 	hub := websocket.NewHub(zapLogger)
+	go hub.Run()
 
 	handler := http_v1.NewHandler(zapLogger, service, hub)
 
