@@ -13,6 +13,13 @@ func (h *Handler) initChatRoutes(app *fiber.App) {
 	chat.Get("/", h.getChats)
 	chat.Post("/", h.createChat)
 
+	chat.Use("/ws", func(c *fiber.Ctx) error {
+		if fws.IsWebSocketUpgrade(c) {
+			return c.Next()
+		}
+		return fiber.ErrUpgradeRequired
+	})
+
 	chat.Get("/ws", fws.New(h.serveWS))
 }
 
@@ -23,8 +30,8 @@ func (h *Handler) serveWS(c *fws.Conn) {
 
 	h.hub.Register(client)
 
-	go client.Read()
 	go client.Write()
+	client.Read()
 }
 
 func (h *Handler) createChat(c *fiber.Ctx) error {

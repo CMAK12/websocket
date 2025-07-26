@@ -15,7 +15,7 @@ func NewClient(
 	hub *Hub,
 ) *Client {
 	return &Client{
-		send: make(chan []byte),
+		send: make(chan []byte, 256),
 		conn: conn,
 		hub:  hub,
 	}
@@ -27,20 +27,20 @@ func (c *Client) Read() {
 		c.conn.Close()
 	}()
 
-	for message := range c.send {
-		c.conn.WriteMessage(websocket.TextMessage, message)
+	for {
+		_, message, err := c.conn.ReadMessage()
+		if err != nil {
+			break
+		}
+
+		c.hub.broadcast <- message
 	}
 }
 
 func (c *Client) Write() {
 	defer c.conn.Close()
 
-	for {
-		_, message, err := c.conn.ReadMessage()
-		if err != nil {
-			return
-		}
-
-		c.hub.Broadcast(message)
+	for message := range c.send {
+		c.conn.WriteMessage(websocket.TextMessage, message)
 	}
 }
