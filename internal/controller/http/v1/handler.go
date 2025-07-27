@@ -5,6 +5,7 @@ import (
 	"cw/internal/service"
 
 	"github.com/gofiber/fiber/v2"
+	"github.com/gofiber/fiber/v2/middleware/recover"
 	"go.uber.org/zap"
 )
 
@@ -26,6 +27,7 @@ func (h *Handler) InitRoutes() *fiber.App {
 	app := fiber.New()
 
 	app.Use(loggingMiddleware(h.logger))
+	app.Use(recover.New())
 
 	h.initChatRoutes(app)
 

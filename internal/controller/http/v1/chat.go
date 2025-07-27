@@ -26,7 +26,8 @@ func (h *Handler) initChatRoutes(app *fiber.App) {
 func (h *Handler) serveWS(c *fws.Conn) {
 	defer c.Close()
 
-	client := websocket.NewClient(c, h.hub)
+	userID := c.Query("id")
+	client := websocket.NewClient(userID, c, h.hub)
 
 	h.hub.Register(client)
 
